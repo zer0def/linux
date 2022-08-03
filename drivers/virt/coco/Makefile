@@ -2,6 +2,7 @@
 #
 # Confidential computing related collateral
 #
+obj-$(CONFIG_CMDLINE_SECRET)	+= cmdline_secret/
 obj-$(CONFIG_EFI_SECRET)	+= efi_secret/
 obj-$(CONFIG_ARM_PKVM_GUEST)	+= pkvm-guest/
 obj-$(CONFIG_SEV_GUEST)		+= sev-guest/
