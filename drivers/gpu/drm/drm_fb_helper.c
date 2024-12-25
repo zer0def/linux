@@ -1787,6 +1787,7 @@ __drm_fb_helper_initial_config_and_unlock(struct drm_fb_helper *fb_helper)
 		mutex_unlock(&fb_helper->lock);
 		return PTR_ERR(info);
 	}
+	//iosys_map_memset(&map, 0, 0x00, screen_size);
 
 	ret = drm_fb_helper_single_fb_probe(fb_helper);
 	if (ret < 0) {
