@@ -207,6 +207,15 @@ int drm_fbdev_ttm_driver_fbdev_probe(struct drm_fb_helper *fb_helper,
 	fb_helper->buffer = buffer;
 	fb_helper->fb = buffer->fb;
 
+	struct iosys_map map;
+	ret = drm_client_buffer_vmap(buffer, &map);
+	if (ret) {
+			goto err_drm_client_framebuffer_delete;
+	} else if (drm_WARN_ON(dev, map.is_iomem)) {
+			ret = -ENODEV; /* I/O memory not supported; use generic emulation */
+			goto err_drm_client_framebuffer_delete;
+	}
+
 	screen_size = buffer->gem->size;
 	screen_buffer = vzalloc(screen_size);
 	if (!screen_buffer) {
@@ -219,6 +228,7 @@ int drm_fbdev_ttm_driver_fbdev_probe(struct drm_fb_helper *fb_helper,
 		ret = PTR_ERR(info);
 		goto err_vfree;
 	}
+	iosys_map_memset(&map, 0, 0x00, screen_size);
 
 	drm_fb_helper_fill_info(info, fb_helper, sizes);
 
@@ -243,6 +253,7 @@ int drm_fbdev_ttm_driver_fbdev_probe(struct drm_fb_helper *fb_helper,
 err_drm_fb_helper_release_info:
 	drm_fb_helper_release_info(fb_helper);
 err_vfree:
+	drm_client_buffer_vunmap(buffer);
 	vfree(screen_buffer);
 err_drm_client_framebuffer_delete:
 	fb_helper->fb = NULL;
